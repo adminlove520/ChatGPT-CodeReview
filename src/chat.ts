@@ -5,11 +5,15 @@ export class Chat {
   constructor(apikey: string) {
     this.chatAPI = new ChatGPTAPI({
       apiKey: apikey,
-      apiBaseUrl: process.env.OPENAI_API_ENDPOINT || 'https://api.openai.com/v1',
+      apiBaseUrl:
+        process.env.OPENAI_API_ENDPOINT || 'https://api.openai.com/v1',
       completionParams: {
         model: process.env.MODEL || 'gpt-3.5-turbo',
         temperature: +(process.env.temperature || 0) || 1,
         top_p: +(process.env.top_p || 0) || 1,
+        max_tokens: process.env.max_tokens
+          ? +process.env.max_tokens
+          : undefined,
       },
     });
   }
@@ -19,7 +23,11 @@ export class Chat {
       ? `Answer me in ${process.env.LANGUAGE},`
       : '';
 
-    return `Bellow is the code patch, please help me do a brief code review,${answerLanguage} if any bug risk and improvement suggestion are welcome
+    const prompt =
+      process.env.PROMPT ||
+        'Below is a code patch, please help me do a brief code review on it. Any bug risks and/or improvement suggestions are welcome:';
+
+    return `${prompt}, ${answerLanguage}:
     ${patch}
     `;
   };
